@@ -1,8 +1,10 @@
 import { render, screen } from '@testing-library/react';
 import App from './App';
 
-test('renders Ocean Snake header and score', () => {
+test('renders Figma-based game canvas', () => {
   render(<App />);
-  expect(screen.getByRole('heading', { name: /ocean snake/i })).toBeInTheDocument();
-  expect(screen.getByText(/score/i)).toBeInTheDocument();
+  // The GameScreenDesign uses a role="application" on the figma-canvas container with an aria-label.
+  expect(
+    screen.getByRole('application', { name: /Ocean Snake — Figma-integrated interactive canvas/i })
+  ).toBeInTheDocument();
 });
