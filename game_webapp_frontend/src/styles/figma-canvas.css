@@ -83,6 +83,12 @@
   padding: clamp(8px, 2.5vmin, 16px);
 }
 
+@media (max-width: 420px), (max-height: 820px) {
+  .figma-page {
+    min-height: 100vh;
+  }
+}
+
 /* A flexible container that centers the canvas and scales it to fit viewport */
 .figma-canvas {
   position: relative;
@@ -125,6 +131,17 @@
 .controls-overlay,
 .frame-9,
 .frame-11 { z-index: 3; }
+
+/* Controls overlay alignment helpers */
+.controls-overlay {
+  /* Prevent scaling clipping issues by ensuring children can be seen */
+  overflow: visible;
+}
+
+.left-frame, .right-frame {
+  /* Ensure internal icons position from their own box */
+  isolation: isolate;
+}
 .image-2,
 .component-1,
 .frame-rate,

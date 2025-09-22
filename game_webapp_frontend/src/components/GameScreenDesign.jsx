@@ -120,7 +120,7 @@ export function GameScreenDesign() {
       left: 16,
       top: 16,
       right: 16,
-      bottom: 120,
+      bottom: 116,
       borderRadius: 'var(--radius-8)',
       border: '1px solid rgba(17,24,39,0.06)',
       background: 'linear-gradient(180deg, rgba(37,99,235,0.04), rgba(255,255,255,0.04))',
@@ -295,38 +295,56 @@ export function GameScreenDesign() {
               right: 16,
               bottom: 16,
               height: 92,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: 8,
+              pointerEvents: 'none', // container doesn't capture; children do
             }}
           >
-            {/* Left control */}
+            {/* Left control - aligned to left per Figma */}
             <div
               className="left-frame"
-              style={{ position: 'absolute', left: -84, top: 0, width: 143, height: 85 }}
+              style={{
+                position: 'relative',
+                width: 143,
+                height: 85,
+                transform: 'translateX(-84px)', // match Figma offset from frame edge
+                pointerEvents: 'auto',
+              }}
               onClick={() => handleControl('left')}
               role="button"
               aria-label="Move left"
               tabIndex={0}
             >
               <div className="left-bg rect-476" />
-              <svg className="poly poly-left" viewBox="0 0 32 32" width="32" height="32" style={{ left: 54, top: 19 }}>
+              <svg
+                className="poly poly-left"
+                viewBox="0 0 32 32"
+                width="32"
+                height="32"
+                style={{ position: 'absolute', left: 54, top: 19 }}
+                aria-hidden="true"
+              >
                 <polygon points="32,0 0,16 32,32" fill="var(--color-444444)" stroke="var(--color-000000)" strokeWidth="1" />
               </svg>
             </div>
 
-            {/* Center control: Start/Pause */}
+            {/* Center control: Start/Pause - centered block per Figma */}
             <div
               className="center-frame rect-476"
               style={{
-                position: 'absolute',
-                left: 50,
-                right: 50,
-                top: 0,
+                position: 'relative',
                 height: 85,
+                minWidth: 120,
+                flex: '0 1 40%',
                 display: 'grid',
                 placeItems: 'center',
                 background: 'rgba(36,36,36,0.6)',
                 border: '1px solid var(--color-303030)',
                 borderRadius: 'var(--radius-16)',
                 cursor: 'pointer',
+                pointerEvents: 'auto',
               }}
               onClick={toggleStartPause}
               role="button"
@@ -336,17 +354,30 @@ export function GameScreenDesign() {
               <div className="text text-typo10" aria-hidden="true">{state.running ? 'Pause' : 'Start'}</div>
             </div>
 
-            {/* Right control */}
+            {/* Right control - aligned to right per Figma */}
             <div
               className="right-frame"
-              style={{ position: 'absolute', right: -84, top: 0, width: 143, height: 85 }}
+              style={{
+                position: 'relative',
+                width: 143,
+                height: 85,
+                transform: 'translateX(84px)', // match Figma offset from frame edge
+                pointerEvents: 'auto',
+              }}
               onClick={() => handleControl('right')}
               role="button"
               aria-label="Move right"
               tabIndex={0}
             >
               <div className="right-bg rect-476" />
-              <svg className="poly poly-right" viewBox="0 0 32 32" width="32" height="32" style={{ left: 54, top: 19 }}>
+              <svg
+                className="poly poly-right"
+                viewBox="0 0 32 32"
+                width="32"
+                height="32"
+                style={{ position: 'absolute', left: 54, top: 19 }}
+                aria-hidden="true"
+              >
                 <polygon points="0,0 32,16 0,32" fill="var(--color-444444)" stroke="var(--color-000000)" strokeWidth="1" />
               </svg>
             </div>
