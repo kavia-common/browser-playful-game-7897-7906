@@ -18,6 +18,8 @@ export function GameScreenDesign() {
 
   // Grid configuration based on the inner "game-grid" region bounds
   const [grid, setGrid] = useState({ cols: 18, rows: 18, cellPx: 16, padding: 8 });
+
+  // Maintain latest engine state; initialize with defaults
   const [state, setState] = useState({
     cols: 18,
     rows: 18,
@@ -27,6 +29,10 @@ export function GameScreenDesign() {
     alive: true,
     running: false,
   });
+
+  // Keep a ref of last emitted score to compute deltas without stale closures
+  const lastScoreRef = useRef(0);
+
   const engineRef = useRef(null);
 
   // Initialize session semantics
@@ -36,17 +42,30 @@ export function GameScreenDesign() {
 
   // Create engine when cols/rows change (responsive)
   useEffect(() => {
-    engineRef.current = new SnakeEngine({
+    const engine = new SnakeEngine({
       cols: grid.cols,
       rows: grid.rows,
-      onChange: (s) => {
-        // update local state and sync score delta to ScoreContext
+      onChange: () => {
+        // Pull fresh snapshot from engine to avoid partially stale object references
+        const s = engine.getState();
         setState(s);
-        addScore(s.score - (state.score ?? 0));
+
+        // delta score into ScoreContext without stale closure
+        const prev = lastScoreRef.current || 0;
+        const delta = (s.score || 0) - prev;
+        if (delta !== 0) addScore(delta);
+        lastScoreRef.current = s.score || 0;
       },
     });
+    engineRef.current = engine;
+
+    // Reset score and internal tracker
     resetScore();
-    setState((prev) => ({ ...prev, score: 0 }));
+    lastScoreRef.current = 0;
+
+    // Emit the initial state to render a fresh board
+    engineRef.current._emit?.();
+
     return () => {
       engineRef.current?.stop?.();
       engineRef.current = null;
@@ -54,7 +73,7 @@ export function GameScreenDesign() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [grid.cols, grid.rows]);
 
-  // Attach window bridge so FooterControls can control this variant as well
+  // Attach window bridge so external controls could operate too
   const startGame = useCallback(() => engineRef.current?.start?.(), []);
   const stopGame = useCallback(() => engineRef.current?.stop?.(), []);
   useEffect(() => {
@@ -82,7 +101,7 @@ export function GameScreenDesign() {
         else engineRef.current.start();
       }
     };
-    window.addEventListener('keydown', onKey);
+    window.addEventListener('keydown', onKey, { passive: true });
     return () => window.removeEventListener('keydown', onKey);
   }, []);
 
@@ -95,14 +114,14 @@ export function GameScreenDesign() {
       const rect = el.getBoundingClientRect();
       // Leave inner padding like the placeholder area
       const padding = 8;
-      const usableW = rect.width - padding * 2;
-      const usableH = rect.height - padding * 2;
+      const usableW = Math.max(0, rect.width - padding * 2);
+      const usableH = Math.max(0, rect.height - padding * 2);
 
       // Aim for square-ish grid. Pick cols based on width and an ideal ~18px cell.
       const idealCell = 18;
-      const cols = Math.max(14, Math.min(28, Math.floor(usableW / idealCell)));
-      const rows = Math.max(14, Math.min(28, Math.floor(usableH / idealCell)));
-      const cellPx = Math.floor(Math.min(usableW / cols, usableH / rows));
+      const cols = Math.max(14, Math.min(28, Math.floor(usableW / idealCell) || 18));
+      const rows = Math.max(14, Math.min(28, Math.floor(usableH / idealCell) || 18));
+      const cellPx = Math.max(8, Math.floor(Math.min(usableW / cols, usableH / rows) || 16));
       setGrid({ cols, rows, cellPx, padding });
     };
 
@@ -130,6 +149,7 @@ export function GameScreenDesign() {
       gridTemplateRows: `repeat(${grid.rows}, 1fr)`,
       gap: `${gap}px`,
       padding: `${grid.padding}px`,
+      touchAction: 'manipulation',
     };
   }, [grid]);
 
@@ -163,15 +183,39 @@ export function GameScreenDesign() {
 
   // Restart on click of HUD score (fits nicely into design without adding extra buttons in the figma)
   const softRestart = useCallback(() => {
+    // Fully reset engine and UI score
     engineRef.current?.stop?.();
-    resetScore();
-    // Reset engine fully to restore initial state and avoid residual speed increases
     engineRef.current?.reset?.();
-    setTimeout(() => engineRef.current?.start?.(), 100);
+    resetScore();
+    lastScoreRef.current = 0;
+    // emit fresh state and auto-start after a short delay to ensure DOM paints
+    engineRef.current?._emit?.();
+    setTimeout(() => engineRef.current?.start?.(), 80);
   }, [resetScore]);
 
   // Derived HUD time: live indicator replacing static "60s"
   const liveTimeText = state.running ? '∞' : '0';
+
+  // Simple swipe/touch arrows: allow up/down in addition to left/right frames for better mobile play
+  const handleTouchStart = useRef({ x: 0, y: 0 });
+  const onTouchStart = (e) => {
+    const t = e.touches?.[0];
+    if (!t) return;
+    handleTouchStart.current = { x: t.clientX, y: t.clientY };
+  };
+  const onTouchEnd = (e) => {
+    const t = e.changedTouches?.[0];
+    if (!t) return;
+    const dx = t.clientX - handleTouchStart.current.x;
+    const dy = t.clientY - handleTouchStart.current.y;
+    if (Math.abs(dx) > Math.abs(dy)) {
+      if (dx > 12) handleControl('right');
+      else if (dx < -12) handleControl('left');
+    } else {
+      if (dy > 12) handleControl('down');
+      else if (dy < -12) handleControl('up');
+    }
+  };
 
   return (
     <div className="figma-page" ref={canvasRef} data-theme={theme}>
@@ -179,6 +223,8 @@ export function GameScreenDesign() {
         className="figma-canvas"
         role="application"
         aria-label="Ocean Snake — Figma-integrated interactive canvas"
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
       >
         {/* HUD mapped near original position with live values */}
         <section
@@ -222,6 +268,7 @@ export function GameScreenDesign() {
             className="frame-9"
             style={{ left: 164, top: -192, width: 60, height: 32 }}
             onClick={softRestart}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') softRestart(); }}
             role="button"
             aria-label="Restart game"
             title="Click to quick-restart"
@@ -313,6 +360,7 @@ export function GameScreenDesign() {
                 pointerEvents: 'auto',
               }}
               onClick={() => handleControl('left')}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleControl('left'); }}
               role="button"
               aria-label="Move left"
               tabIndex={0}
@@ -347,6 +395,7 @@ export function GameScreenDesign() {
                 pointerEvents: 'auto',
               }}
               onClick={toggleStartPause}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') toggleStartPause(); }}
               role="button"
               aria-label={state.running ? 'Pause' : 'Start'}
               tabIndex={0}
@@ -365,6 +414,7 @@ export function GameScreenDesign() {
                 pointerEvents: 'auto',
               }}
               onClick={() => handleControl('right')}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleControl('right'); }}
               role="button"
               aria-label="Move right"
               tabIndex={0}
