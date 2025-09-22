@@ -4,7 +4,7 @@
   display: grid;
   place-items: center;
   /* Allow scaled canvas to be fully visible */
-  overflow: visible;
+  overflow: hidden; /* prevent accidental page scroll from scaled canvas, figma-page handles its own overflow */
 }
 
 .app-gradient {
@@ -140,6 +140,7 @@
   gap: 6px;
   justify-content: center;
   align-items: center;
+  z-index: 4; /* above game grid */
 }
 
 .snake-controls .pad-row {
@@ -220,6 +221,16 @@
 .btn:focus-visible {
   outline: 3px solid rgba(37,99,235,0.35);
   outline-offset: 2px;
+}
+
+/* Focus ring for clickable frames inside Figma canvas */
+.left-frame:focus-visible,
+.right-frame:focus-visible,
+.center-frame:focus-visible,
+.frame-9:focus-visible {
+  outline: 3px solid rgba(37,99,235,0.35);
+  outline-offset: 3px;
+  border-radius: 14px;
 }
 
 .btn-primary {

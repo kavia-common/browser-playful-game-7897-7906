@@ -79,56 +79,56 @@
   background: var(--color-1c1c1c);
   /* Prevent body-level overflow causing partial clipping */
   overflow: auto;
+  /* Add breathing room on very small screens to avoid clipped edges / notches */
+  padding: clamp(8px, 2.5vmin, 16px);
 }
 
 /* A flexible container that centers the canvas and scales it to fit viewport */
 .figma-canvas {
   position: relative;
+  /* Keep the canvas at design reference size */
   width: var(--canvas-width);
   height: var(--canvas-height);
   background: var(--color-1c1c1c);
   overflow: hidden;
   /* Center the fixed-size canvas */
   margin: 0 auto;
+  /* Establish stacking context so children z-index work as expected */
+  isolation: isolate;
+
+  /* Compute scale factor based on viewport; clamp to 1 to avoid upscaling blur */
+  --scale-w: calc((100vw - 2rem) / var(--canvas-width));
+  --scale-h: calc((100vh - 2rem) / var(--canvas-height));
+  --scale: min(var(--scale-w), var(--scale-h));
+  --scale-clamped: min(var(--scale), 1);
+
+  /* Apply transform scaling while keeping layout box the same reference size.
+     We do not alter width/height here to avoid double-scaling / overflow jitter. */
+  transform: scale(var(--scale-clamped));
+  transform-origin: top center;
 }
 
-/* Ensure children are absolutely positioned within the canvas */
+/* Ensure children are absolutely positioned within the canvas and can layer properly */
 .figma-canvas > * { position: absolute; }
 
-/* Responsive behavior: keep full canvas visible by scaling down to fit viewport while preserving aspect ratio */
-@media (max-width: 9000px) {
+/* Provide a minimum viewport fit for very small devices: allow the canvas to scale down more gracefully */
+@media (max-width: 420px), (max-height: 820px) {
   .figma-page {
-    /* Create a centering context with padding so scaled canvas is not cut off by notches/UA bars */
-    padding: 12px;
-  }
-  .figma-canvas {
-    /* Use CSS min() to choose the limiting dimension.
-       We compute scale for width and height separately and use transform to scale content
-       while reserving space using a transform wrapper technique via ::before. */
-    transform-origin: top center;
+    padding: clamp(8px, 2.5vmin, 16px);
   }
 }
 
-/* Transform wrapper technique: wrap via a utility class to scale reliably */
-.figma-canvas {
-  /* Use a CSS variable to hold the computed scale based on viewport */
-  --scale-w: calc(100vw / var(--canvas-width));
-  --scale-h: calc(100vh / var(--canvas-height));
-  --scale: min(var(--scale-w), var(--scale-h));
-  /* Limit scale to 1 (don’t upscale beyond 1 to avoid blurriness) */
-  --scale-clamped: min(var(--scale), 1);
-  /* Reserve the scaled box space using CSS grid centering from figma-page, and center with margin auto */
-  width: calc(var(--canvas-width) * var(--scale-clamped));
-  height: calc(var(--canvas-height) * var(--scale-clamped));
-  /* Create a stacking context for inner absolute layout at 1:1, then scale content via inner wrapper */
-}
-
-/* Inner content wrapper: we simulate it by scaling all children using a transform on the canvas itself,
-   but we must preserve pointer coords; since controls are large, this is acceptable. */
-.figma-canvas {
-  /* Scale the internal coordinate system */
-  transform: scale(var(--scale-clamped));
-}
+/* Z-index layering to ensure interactivity above decor */
+.game-frame { z-index: 1; }
+.game-grid { z-index: 2; }
+.hud,
+.controls-overlay,
+.frame-9,
+.frame-11 { z-index: 3; }
+.image-2,
+.component-1,
+.frame-rate,
+.timer { z-index: 0; }
 
 /* Text styles */
 .text {
@@ -199,6 +199,13 @@
 .left-frame, .right-frame { position: absolute; }
 .poly { position: absolute; }
 
+/* Safer touch targets on small screens */
+@media (max-width: 420px) {
+  .left-frame, .right-frame, .center-frame {
+    touch-action: manipulation;
+  }
+}
+
 .randomiser { position: absolute; opacity: 0; }
 .randomiser .star-3 { position: absolute; opacity: 1; }
 
@@ -215,6 +222,8 @@
   height: 100%;
   object-fit: cover;
   opacity: 0.3;
+  z-index: 0;
+  pointer-events: none; /* do not block interactions */
 }
 
 .fruit-1 { position: absolute; }

@@ -190,7 +190,8 @@ export function GameScreenDesign() {
             width: 230,
             height: 32,
             /* Ensure HUD is visible even when scaled */
-            maxWidth: 'calc(var(--canvas-width) - 40px)'
+            maxWidth: 'calc(var(--canvas-width) - 40px)',
+            zIndex: 3
           }}
         >
           <div
@@ -299,7 +300,7 @@ export function GameScreenDesign() {
             {/* Left control */}
             <div
               className="left-frame"
-              style={{ left: -84, top: 0, width: 143, height: 85 }}
+              style={{ position: 'absolute', left: -84, top: 0, width: 143, height: 85 }}
               onClick={() => handleControl('left')}
               role="button"
               aria-label="Move left"
@@ -338,7 +339,7 @@ export function GameScreenDesign() {
             {/* Right control */}
             <div
               className="right-frame"
-              style={{ right: -84, top: 0, width: 143, height: 85, position: 'absolute' }}
+              style={{ position: 'absolute', right: -84, top: 0, width: 143, height: 85 }}
               onClick={() => handleControl('right')}
               role="button"
               aria-label="Move right"
