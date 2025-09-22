@@ -79,8 +79,8 @@
   background: var(--color-1c1c1c);
   /* Prevent body-level overflow causing partial clipping */
   overflow: auto;
-  /* Add breathing room on very small screens to avoid clipped edges / notches */
-  padding: clamp(8px, 2.5vmin, 16px);
+  /* Remove desktop padding to match Figma; small screens will still clamp below */
+  padding: 0;
 }
 
 @media (max-width: 420px), (max-height: 820px) {
@@ -111,7 +111,7 @@
   /* Apply transform scaling while keeping layout box the same reference size.
      We do not alter width/height here to avoid double-scaling / overflow jitter. */
   transform: scale(var(--scale-clamped));
-  transform-origin: top center;
+  transform-origin: top left;
 }
 
 /* Ensure children are absolutely positioned within the canvas and can layer properly */
@@ -120,7 +120,8 @@
 /* Provide a minimum viewport fit for very small devices: allow the canvas to scale down more gracefully */
 @media (max-width: 420px), (max-height: 820px) {
   .figma-page {
-    padding: clamp(8px, 2.5vmin, 16px);
+    min-height: 100vh;
+    padding: clamp(4px, 2.5vmin, 8px);
   }
 }
 
@@ -151,6 +152,7 @@
 .text {
   position: absolute;
   white-space: pre;
+  font-family: "TT Fors", "Turret Road", system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Helvetica Neue", Arial, "Noto Sans";
 }
 
 .text-typo9 {

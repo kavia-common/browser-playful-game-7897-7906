@@ -133,16 +133,16 @@ export function GameScreenDesign() {
 
   // Render helpers
   const gridStyle = useMemo(() => {
-    const gap = Math.max(1, Math.floor(grid.cellPx * 0.08));
+    const gap = Math.max(1, Math.floor(grid.cellPx * 0.06));
     return {
       position: 'absolute',
       left: 16,
       top: 16,
       right: 16,
-      bottom: 116,
+      bottom: 16,
       borderRadius: 'var(--radius-8)',
       border: '1px solid rgba(17,24,39,0.06)',
-      background: 'linear-gradient(180deg, rgba(37,99,235,0.04), rgba(255,255,255,0.04))',
+      background: 'rgba(255,255,255,0.02)',
       overflow: 'hidden',
       display: 'grid',
       gridTemplateColumns: `repeat(${grid.cols}, 1fr)`,
@@ -233,40 +233,36 @@ export function GameScreenDesign() {
           style={{
             left: 26.5,
             top: 195,
-            width: 230,
-            height: 32,
-            /* Ensure HUD is visible even when scaled */
-            maxWidth: 'calc(var(--canvas-width) - 40px)',
+            width: 83,
+            height: 16,
             zIndex: 3
           }}
         >
           <div
             className="frame-11"
-            style={{ left: 0, top: 0, width: 120, height: 16 }}
+            style={{ left: 0, top: 0, width: 83, height: 16 }}
           >
-            <div className="text text-typo9" style={{ left: 0, top: 0, width: 82, height: 16 }}>TIME LEFT:</div>
-            <div className="text text-typo10" style={{ left: 82, top: 0, width: 24, height: 16 }}>
+            <div className="text text-typo9" style={{ left: 0, top: 0, width: 62, height: 16 }}>TIME LEFT:</div>
+            <div className="text text-typo10" style={{ left: 62, top: 0, width: 15, height: 16 }}>
               {liveTimeText}
             </div>
-            <div className="text text-typo10" style={{ left: 108, top: 0, width: 12, height: 16 }}>s</div>
+            <div className="text text-typo10" style={{ left: 77, top: 0, width: 6, height: 16 }}>s</div>
           </div>
-          {/* Time bar visual cue now reflects running state and slight pulse when playing */}
+          {/* Time bar (static per Figma spec) */}
           <div
             className="rect-477"
             style={{
               left: -82,
-              top: -7,
+              top: 188 - 195, /* relative to this section's top */
               width: 300,
-              height: 2,
-              opacity: state.running ? 1 : 0.45,
-              transition: 'opacity var(--transition-fast)',
+              height: 2
             }}
             aria-hidden="true"
           />
-          {/* Live Score number near HUD */}
+          {/* Live Score number (frame-9) at canvas scope; we place it here but use absolute Figma coordinates */}
           <div
             className="frame-9"
-            style={{ left: 164, top: -192, width: 60, height: 32 }}
+            style={{ left: 164, top: -387, width: 16, height: 32, position: 'absolute' }}
             onClick={softRestart}
             onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') softRestart(); }}
             role="button"
@@ -274,7 +270,7 @@ export function GameScreenDesign() {
             title="Click to quick-restart"
             tabIndex={0}
           >
-            <div className="text text-typo14" style={{ left: 0, top: 0, width: 60, height: 32, color: 'var(--color-fd4e3d)' }}>
+            <div className="text text-typo14" style={{ left: 0, top: 0, width: 16, height: 32, color: 'var(--color-fd4e3d)' }}>
               {state.score}
             </div>
           </div>
@@ -284,17 +280,15 @@ export function GameScreenDesign() {
         <section
           className="game-frame"
           style={{
-            /* Center the game frame inside the canvas rather than negative offsets that can clip */
-            left: '50%',
-            top: '50%',
+            left: -88,
+            top: -345,
             width: 312,
-            height: 528,
-            transform: 'translate(-50%, -50%)'
+            height: 528
           }}
           aria-label="Game area container"
           data-theme={theme}
         >
-          <img className="game-bg" src="/assets/figma_image_66_224.png" alt="" />
+          <img className="game-bg" src="/assets/figma_image_66_224.png" alt="" loading="eager" decoding="async" />
 
           {/* Interactive GRID region replacing the placeholder */}
           <div
@@ -308,7 +302,7 @@ export function GameScreenDesign() {
           </div>
 
           {/* Paused message overlay centered within the grid area */}
-          {!state.running && state.alive && (
+          {false && !state.running && state.alive && (
             <div
               className="hud"
               style={{ top: 24, left: 16, right: 16, justifyContent: 'center' }}
@@ -317,8 +311,8 @@ export function GameScreenDesign() {
             </div>
           )}
 
-          {/* Game over badge */}
-          {!state.alive && (
+          {/* Game over badge (hidden by default to preserve Figma visuals) */}
+          {false && !state.alive && (
             <div
               className="hud"
               style={{ top: 24, left: 16, right: 16, justifyContent: 'center' }}
@@ -332,110 +326,91 @@ export function GameScreenDesign() {
             </div>
           )}
 
-          {/* Controls overlay: left/right and center start/pause tied to engine */}
+          {/* Controls: absolute per Figma */}
           <div
-            className="controls-overlay"
-            aria-label="Controls overlay"
+            className="left-frame"
             style={{
+              left: -84,
+              top: 228,
+              width: 143,
+              height: 85,
               position: 'absolute',
-              left: 16,
-              right: 16,
-              bottom: 16,
-              height: 92,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: 8,
-              pointerEvents: 'none', // container doesn't capture; children do
+              cursor: 'pointer'
             }}
+            onClick={() => handleControl('left')}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleControl('left'); }}
+            role="button"
+            aria-label="Move left"
+            tabIndex={0}
           >
-            {/* Left control - aligned to left per Figma */}
-            <div
-              className="left-frame"
-              style={{
-                position: 'relative',
-                width: 143,
-                height: 85,
-                transform: 'translateX(-84px)', // match Figma offset from frame edge
-                pointerEvents: 'auto',
-              }}
-              onClick={() => handleControl('left')}
-              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleControl('left'); }}
-              role="button"
-              aria-label="Move left"
-              tabIndex={0}
+            <div className="left-bg rect-476" />
+            <svg
+              className="poly poly-left"
+              viewBox="0 0 32 32"
+              width="32"
+              height="32"
+              style={{ left: 54, top: 19 }}
+              aria-hidden="true"
             >
-              <div className="left-bg rect-476" />
-              <svg
-                className="poly poly-left"
-                viewBox="0 0 32 32"
-                width="32"
-                height="32"
-                style={{ position: 'absolute', left: 54, top: 19 }}
-                aria-hidden="true"
-              >
-                <polygon points="32,0 0,16 32,32" fill="var(--color-444444)" stroke="var(--color-000000)" strokeWidth="1" />
-              </svg>
-            </div>
+              <polygon points="32,0 0,16 32,32" fill="var(--color-444444)" stroke="var(--color-000000)" strokeWidth="1" />
+            </svg>
+          </div>
 
-            {/* Center control: Start/Pause - centered block per Figma */}
-            <div
-              className="center-frame rect-476"
-              style={{
-                position: 'relative',
-                height: 85,
-                minWidth: 120,
-                flex: '0 1 40%',
-                display: 'grid',
-                placeItems: 'center',
-                background: 'rgba(36,36,36,0.6)',
-                border: '1px solid var(--color-303030)',
-                borderRadius: 'var(--radius-16)',
-                cursor: 'pointer',
-                pointerEvents: 'auto',
-              }}
-              onClick={toggleStartPause}
-              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') toggleStartPause(); }}
-              role="button"
-              aria-label={state.running ? 'Pause' : 'Start'}
-              tabIndex={0}
-            >
-              <div className="text text-typo10" aria-hidden="true">{state.running ? 'Pause' : 'Start'}</div>
-            </div>
+          <div
+            className="center-frame"
+            style={{
+              left: 0,
+              top: 228,
+              width: 143,
+              height: 85,
+              position: 'absolute',
+              display: 'grid',
+              placeItems: 'center',
+              cursor: 'pointer'
+            }}
+            onClick={toggleStartPause}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') toggleStartPause(); }}
+            role="button"
+            aria-label={state.running ? 'Pause' : 'Start'}
+            tabIndex={0}
+          >
+            <div className="rect-476" />
+            {/* Remove text label to match icon-only style if needed; keep minimal label for a11y hidden visually */}
+            <span className="visually-hidden">{state.running ? 'Pause' : 'Start'}</span>
+          </div>
 
-            {/* Right control - aligned to right per Figma */}
-            <div
-              className="right-frame"
-              style={{
-                position: 'relative',
-                width: 143,
-                height: 85,
-                transform: 'translateX(84px)', // match Figma offset from frame edge
-                pointerEvents: 'auto',
-              }}
-              onClick={() => handleControl('right')}
-              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleControl('right'); }}
-              role="button"
-              aria-label="Move right"
-              tabIndex={0}
+          <div
+            className="right-frame"
+            style={{
+              left: 77,
+              top: 228,
+              width: 143,
+              height: 85,
+              position: 'absolute',
+              cursor: 'pointer'
+            }}
+            onClick={() => handleControl('right')}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleControl('right'); }}
+            role="button"
+            aria-label="Move right"
+            tabIndex={0}
+          >
+            <div className="right-bg rect-476" />
+            <svg
+              className="poly poly-right"
+              viewBox="0 0 32 32"
+              width="32"
+              height="32"
+              style={{ left: 54, top: 19 }}
+              aria-hidden="true"
             >
-              <div className="right-bg rect-476" />
-              <svg
-                className="poly poly-right"
-                viewBox="0 0 32 32"
-                width="32"
-                height="32"
-                style={{ position: 'absolute', left: 54, top: 19 }}
-                aria-hidden="true"
-              >
-                <polygon points="0,0 32,16 0,32" fill="var(--color-444444)" stroke="var(--color-000000)" strokeWidth="1" />
-              </svg>
-            </div>
+              <polygon points="0,0 32,16 0,32" fill="var(--color-444444)" stroke="var(--color-000000)" strokeWidth="1" />
+            </svg>
           </div>
         </section>
 
         {/* Decorative elements preserved and left non-interactive */}
-        <div className="component-1" style={{ left: 160, top: 8, width: 16, height: 16 }}>
+        <div className="component-1" style={{ left: 160, top: -380, width: 16, height: 16 }}>
           <div className="gem" />
         </div>
 
@@ -443,11 +418,12 @@ export function GameScreenDesign() {
           className="image-2"
           src="/assets/figma_image_27_231.png"
           alt=""
-          style={{ left: 12, top: 8, width: 88, height: 30 }}
+          style={{ left: -87, top: -390, width: 88, height: 30 }}
+          loading="eager" decoding="async"
         />
 
         {/* Non-essential visual-only elements remain hidden (per design css they have opacity:0) */}
-        <div className="frame-rate" style={{ left: 12, top: 52, width: 51, height: 51 }} aria-hidden="true">
+        <div className="frame-rate" style={{ left: -112, top: -422, width: 51, height: 51 }} aria-hidden="true">
           <div className="frame-star" style={{ left: 8, top: 8, width: 35, height: 35 }}>
             <svg viewBox="0 0 35 35" width="35" height="35" aria-hidden="true">
               <polygon
@@ -458,7 +434,7 @@ export function GameScreenDesign() {
           </div>
         </div>
 
-        <div className="timer" style={{ left: 70, top: 56, width: 40, height: 40 }} aria-hidden="true">
+        <div className="timer" style={{ left: -112, top: -422, width: 40, height: 40 }} aria-hidden="true">
           <div className="timer-star" style={{ left: 8, top: 8, width: 24, height: 24 }}>
             <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
               <polygon
