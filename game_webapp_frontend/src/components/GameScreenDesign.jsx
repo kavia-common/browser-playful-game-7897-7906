@@ -170,6 +170,9 @@ export function GameScreenDesign() {
     setTimeout(() => engineRef.current?.start?.(), 100);
   }, [resetScore]);
 
+  // Derived HUD time: live indicator replacing static "60s"
+  const liveTimeText = state.running ? '∞' : '0';
+
   return (
     <div className="figma-page" ref={canvasRef} data-theme={theme}>
       <div
@@ -189,19 +192,33 @@ export function GameScreenDesign() {
           >
             <div className="text text-typo9" style={{ left: 0, top: 0, width: 82, height: 16 }}>TIME LEFT:</div>
             <div className="text text-typo10" style={{ left: 82, top: 0, width: 24, height: 16 }}>
-              {/* Simple timer feel: derive from running state; not a countdown mechanic */}
-              {state.running ? '∞' : '0'}
+              {liveTimeText}
             </div>
             <div className="text text-typo10" style={{ left: 108, top: 0, width: 12, height: 16 }}>s</div>
           </div>
-          {/* Time bar visual cue */}
+          {/* Time bar visual cue now reflects running state and slight pulse when playing */}
           <div
             className="rect-477"
-            style={{ left: -82, top: -7, width: 300, height: 2, opacity: state.running ? 1 : 0.5 }}
+            style={{
+              left: -82,
+              top: -7,
+              width: 300,
+              height: 2,
+              opacity: state.running ? 1 : 0.45,
+              transition: 'opacity var(--transition-fast)',
+            }}
             aria-hidden="true"
           />
           {/* Live Score number near HUD */}
-          <div className="frame-9" style={{ left: 164, top: -192, width: 60, height: 32 }} onClick={softRestart} title="Click to quick-restart">
+          <div
+            className="frame-9"
+            style={{ left: 164, top: -192, width: 60, height: 32 }}
+            onClick={softRestart}
+            role="button"
+            aria-label="Restart game"
+            title="Click to quick-restart"
+            tabIndex={0}
+          >
             <div className="text text-typo14" style={{ left: 0, top: 0, width: 60, height: 32, color: 'var(--color-fd4e3d)' }}>
               {state.score}
             </div>
@@ -228,7 +245,7 @@ export function GameScreenDesign() {
             {renderCells}
           </div>
 
-          {/* Empty/Paused message overlay centered within the grid area */}
+          {/* Paused message overlay centered within the grid area */}
           {!state.running && state.alive && (
             <div
               className="hud"
@@ -299,6 +316,7 @@ export function GameScreenDesign() {
               onClick={toggleStartPause}
               role="button"
               aria-label={state.running ? 'Pause' : 'Start'}
+              tabIndex={0}
             >
               <div className="text text-typo10" aria-hidden="true">{state.running ? 'Pause' : 'Start'}</div>
             </div>
@@ -320,7 +338,7 @@ export function GameScreenDesign() {
           </div>
         </section>
 
-        {/* Decorative elements preserved */}
+        {/* Decorative elements preserved and left non-interactive */}
         <div className="component-1" style={{ left: 160, top: -380, width: 16, height: 16 }}>
           <div className="gem" />
         </div>
@@ -332,6 +350,7 @@ export function GameScreenDesign() {
           style={{ left: -87, top: -390, width: 88, height: 30 }}
         />
 
+        {/* Non-essential visual-only elements remain hidden (per design css they have opacity:0) */}
         <div className="frame-rate" style={{ left: -112, top: -422, width: 51, height: 51 }} aria-hidden="true">
           <div className="frame-star" style={{ left: 8, top: 8, width: 35, height: 35 }}>
             <svg viewBox="0 0 35 35" width="35" height="35" aria-hidden="true">
