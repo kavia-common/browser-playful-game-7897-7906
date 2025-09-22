@@ -1,204 +1,211 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useScore } from '../context/ScoreContext';
 import { useTheme } from '../context/ThemeContext';
+import { SnakeEngine } from './snake/SnakeEngine';
 
 /**
  * PUBLIC_INTERFACE
  * Game
- * A fast, playful target-tapping game. Click/tap or press Space/Enter when the
- * target is highlighted to earn points before the timer ends.
- * - Session score is tracked in context and displayed in header.
- * - Mobile touch + desktop mouse/keyboard supported.
+ * Classic Snake game with keyboard and mobile touch/virtual controls.
+ * - Session score is tracked as number of food eaten (snake length - initial length).
+ * - Responsive grid centered in the layout with Ocean Professional theme styling.
  */
 export function Game() {
   const surfaceRef = useRef(null);
-  const { addScore, resetSessionIfNew } = useScore();
+  const { addScore, resetSessionIfNew, resetScore } = useScore();
   const { theme } = useTheme();
 
-  // Local state
-  const [pos, setPos] = useState({ x: 50, y: 50 });
-  const [active, setActive] = useState(true);
-  const [timeLeft, setTimeLeft] = useState(30); // seconds
-  const [running, setRunning] = useState(false);
-  const [combo, setCombo] = useState(0);
-  const [lastTap, setLastTap] = useState(0);
-  const [flash, setFlash] = useState(null); // transient combo badge
+  // Grid config responsive to container
+  const [grid, setGrid] = useState({ cols: 20, rows: 20, cellPx: 0 });
+  const [state, setState] = useState({
+    cols: 20,
+    rows: 20,
+    snake: [],
+    food: { x: -1, y: -1 },
+    score: 0,
+    alive: true,
+    running: false,
+  });
 
-  // Reset session start time (structure for future persistence)
+  const engineRef = useRef(null);
+
+  // Initialize session
   useEffect(() => {
     resetSessionIfNew();
   }, [resetSessionIfNew]);
 
-  // Countdown timer
+  // Setup engine when grid changes
   useEffect(() => {
-    if (!running) return;
-    if (timeLeft <= 0) {
-      setRunning(false);
-      setActive(false);
-      return;
-    }
-    const t = setTimeout(() => setTimeLeft((t) => t - 1), 1000);
-    return () => clearTimeout(t);
-  }, [running, timeLeft]);
-
-  const moveTarget = useCallback(() => {
-    const el = surfaceRef.current;
-    if (!el) return;
-    const rect = el.getBoundingClientRect();
-    const pad = 40; // avoid edges
-    const x = Math.random() * (rect.width - pad * 2) + pad;
-    const y = Math.random() * (rect.height - pad * 2) + pad;
-    // convert to percentage
-    setPos({
-      x: (x / rect.width) * 100,
-      y: (y / rect.height) * 100,
+    engineRef.current = new SnakeEngine({
+      cols: grid.cols,
+      rows: grid.rows,
+      onChange: (s) => {
+        setState(s);
+        // Sync score to ScoreContext
+        // We keep ScoreContext as the display-of-truth for header
+        // s.score already represents foods eaten.
+        addScore(s.score - (state.score ?? 0));
+      },
     });
-  }, []);
+    // Ensure displayed score matches engine
+    resetScore();
+    setState((prev) => ({ ...prev, score: 0 }));
+    return () => {
+      engineRef.current?.stop?.();
+      engineRef.current = null;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [grid.cols, grid.rows]);
 
-  const startGame = useCallback(() => {
-    setRunning(true);
-    setActive(true);
-    setTimeLeft(30);
-    setCombo(0);
-    moveTarget();
-  }, [moveTarget]);
+  // Window control bridge for FooterControls
+  const startGame = useCallback(() => engineRef.current?.start?.(), []);
+  const stopGame = useCallback(() => engineRef.current?.stop?.(), []);
+  useEffect(() => {
+    window.__oceanGame = {
+      start: startGame,
+      stop: stopGame,
+      isRunning: () => engineRef.current?.isRunning?.() || false,
+    };
+    return () => {
+      if (window.__oceanGame) delete window.__oceanGame;
+    };
+  }, [startGame, stopGame]);
 
-  const stopGame = useCallback(() => {
-    setRunning(false);
-    setActive(false);
-  }, []);
-
-  const onHit = useCallback(
-    (px, py) => {
-      if (!running) return;
-      // combo logic: if within 750ms, increase combo
-      const now = Date.now();
-      const within = now - lastTap < 750;
-      const nextCombo = within ? combo + 1 : 1;
-      setCombo(nextCombo);
-      setLastTap(now);
-
-      // base points + combo multiplier
-      const gained = 10 + Math.min(40, nextCombo * 2);
-      addScore(gained);
-
-      // flash combo badge
-      setFlash({ x: px, y: py, combo: nextCombo, gained });
-      setTimeout(() => setFlash(null), 600);
-
-      moveTarget();
-    },
-    [running, combo, lastTap, addScore, moveTarget]
-  );
-
-  // Click/tap on target
-  const handleTargetPointerDown = useCallback(
-    (e) => {
-      const rect = e.currentTarget.getBoundingClientRect();
-      onHit(rect.left + rect.width / 2, rect.top); // reference badge position
-    },
-    [onHit]
-  );
-
-  // Keyboard support
+  // Keyboard controls
   useEffect(() => {
     const onKey = (e) => {
-      if (!running) return;
-      if (e.key === ' ' || e.key === 'Enter') {
-        // treat keypress as a hit if target is active
-        const el = surfaceRef.current?.querySelector('.target');
-        if (el) {
-          const r = el.getBoundingClientRect();
-          onHit(r.left + r.width / 2, r.top);
-        }
+      if (!engineRef.current) return;
+      const k = e.key.toLowerCase();
+      if (k === 'arrowup' || k === 'w') engineRef.current.setDirection('up');
+      else if (k === 'arrowdown' || k === 's') engineRef.current.setDirection('down');
+      else if (k === 'arrowleft' || k === 'a') engineRef.current.setDirection('left');
+      else if (k === 'arrowright' || k === 'd') engineRef.current.setDirection('right');
+      else if (k === ' ' || k === 'enter') {
+        // quick start/pause toggle
+        if (engineRef.current.isRunning()) engineRef.current.stop();
+        else engineRef.current.start();
       }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [running, onHit]);
+  }, []);
 
-  // Ensure target remains within surface on resize
+  // Virtual controls for mobile
+  const handleControl = (dir) => engineRef.current?.setDirection?.(dir);
+
+  // Resize observer to adapt grid and cell size responsively
   useEffect(() => {
-    const onResize = () => moveTarget();
-    window.addEventListener('resize', onResize);
-    return () => window.removeEventListener('resize', onResize);
-  }, [moveTarget]);
+    const el = surfaceRef.current;
+    if (!el) return;
 
-  const posStyle = useMemo(
-    () => ({
-      left: `${pos.x}%`,
-      top: `${pos.y}%`,
-    }),
-    [pos]
-  );
+    const computeGrid = () => {
+      const rect = el.getBoundingClientRect();
+      // Pick a cell size that fits neatly; target around 24-28px for mobile, 24-32+ for desktop
+      const idealCell = Math.max(20, Math.min(32, Math.floor(rect.width / 20)));
+      const cols = Math.max(16, Math.min(28, Math.floor(rect.width / idealCell)));
+      const rows = cols; // keep square
+      const cellPx = Math.floor(rect.width / cols);
+      setGrid({ cols, rows, cellPx });
+    };
+
+    computeGrid();
+    const ro = new ResizeObserver(computeGrid);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  // Derived styles
+  const gridStyle = useMemo(() => {
+    const gap = 2; // visual gap between cells
+    return {
+      display: 'grid',
+      gridTemplateColumns: `repeat(${grid.cols}, 1fr)`,
+      gridTemplateRows: `repeat(${grid.rows}, 1fr)`,
+      gap: `${Math.max(1, Math.floor(grid.cellPx * 0.08))}px`,
+      width: '100%',
+      height: '100%',
+      padding: `${Math.max(6, Math.floor(grid.cellPx * 0.2))}px`,
+    };
+  }, [grid]);
+
+  const renderCells = useMemo(() => {
+    const cells = new Array(grid.rows * grid.cols).fill(0);
+    const snakeSet = new Set(state.snake.map((s) => `${s.x},${s.y}`));
+    const foodKey = `${state.food.x},${state.food.y}`;
+
+    return cells.map((_, idx) => {
+      const x = idx % grid.cols;
+      const y = Math.floor(idx / grid.cols);
+      const key = `${x},${y}`;
+      const isSnake = snakeSet.has(key);
+      const isHead = isSnake && state.snake[state.snake.length - 1]?.x === x && state.snake[state.snake.length - 1]?.y === y;
+      const isFood = key === foodKey;
+
+      return (
+        <div
+          key={key}
+          className={`snake-cell${isSnake ? ' snake' : ''}${isHead ? ' head' : ''}${isFood ? ' food' : ''}`}
+          aria-hidden="true"
+        />
+      );
+    });
+  }, [grid.cols, grid.rows, state.snake, state.food]);
 
   return (
     <section
-      className="game-surface"
+      className="game-surface snake-surface"
       ref={surfaceRef}
-      aria-label="Game area"
+      aria-label="Snake game area"
       aria-live="polite"
       data-theme={theme}
     >
       {/* HUD */}
       <div className="hud">
         <div className="hud-badge" aria-live="polite">
-          ⏱️ Time: {timeLeft}s
+          🐍 Length: {state.snake.length}
         </div>
-        {combo > 1 && <div className="hud-badge">🔥 Combo x{combo}</div>}
+        <div className="hud-badge" aria-live="polite">
+          ⭐ Score: {state.score}
+        </div>
+        {!state.alive && (
+          <div className="hud-badge" style={{ background: 'rgba(239,68,68,0.12)', borderColor: 'rgba(239,68,68,0.35)', color: '#7f1d1d' }}>
+            Game Over
+          </div>
+        )}
       </div>
 
-      {/* Target */}
-      {active && (
-        <button
-          className="target"
-          style={posStyle}
-          onPointerDown={handleTargetPointerDown}
-          onClick={(e) => e.preventDefault()}
-          aria-label="Tap target"
-        />
-      )}
+      {/* Grid */}
+      <div className="snake-grid" style={gridStyle} role="grid" aria-label="Snake grid">
+        {renderCells}
+      </div>
 
-      {/* Combo flash */}
-      {flash && (
-        <div
-          className="combo"
-          style={{
-            left: `${(flash.x - surfaceRef.current.getBoundingClientRect().left) / surfaceRef.current.getBoundingClientRect().width * 100}%`,
-            top: `${(flash.y - surfaceRef.current.getBoundingClientRect().top) / surfaceRef.current.getBoundingClientRect().height * 100}%`,
-          }}
-          aria-hidden="true"
-        >
-          +{flash.gained} • x{flash.combo}
-        </div>
-      )}
-
-      {/* Empty state */}
-      {!running && (
+      {/* Empty/Paused state */}
+      {!state.running && state.alive && (
         <div className="hud" style={{ justifyContent: 'center' }}>
-          <div className="hud-badge">Press Start to play</div>
+          <div className="hud-badge">Press Start or Space to play</div>
         </div>
       )}
 
-      {/* Hidden controls for screen readers */}
-      <span className="visually-hidden">
-        Use mouse/touch to tap the moving target. Space or Enter also counts as a hit.
-      </span>
-
-      {/* Control hooks exposed via window for footer buttons */}
-      <GameControlsBridge start={startGame} stop={stopGame} isRunning={running} />
+      {/* Virtual Controls (mobile) */}
+      <div className="snake-controls" aria-label="Virtual controls">
+        <div className="pad-row">
+          <button className="btn btn-ghost d-btn" onClick={() => handleControl('up')} aria-label="Up">▲</button>
+        </div>
+        <div className="pad-row">
+          <button className="btn btn-ghost d-btn" onClick={() => handleControl('left')} aria-label="Left">◀</button>
+          <button
+            className={`btn ${state.running ? 'btn-ghost' : 'btn-primary'} d-btn center`}
+            onClick={() => (engineRef.current?.isRunning() ? engineRef.current?.stop() : engineRef.current?.start())}
+            aria-label={state.running ? 'Pause' : 'Start'}
+          >
+            {state.running ? '❚❚' : '▶'}
+          </button>
+          <button className="btn btn-ghost d-btn" onClick={() => handleControl('right')} aria-label="Right">▶</button>
+        </div>
+        <div className="pad-row">
+          <button className="btn btn-ghost d-btn" onClick={() => handleControl('down')} aria-label="Down">▼</button>
+        </div>
+      </div>
     </section>
   );
-}
-
-function GameControlsBridge({ start, stop, isRunning }) {
-  // Bridge exposes functions for FooterControls without prop drilling through App
-  // Simple approach since both live in same tree; avoids global store dependency.
-  useEffect(() => {
-    window.__oceanGame = { start, stop, isRunning: () => isRunning };
-    return () => {
-      if (window.__oceanGame) delete window.__oceanGame;
-    };
-  }, [start, stop, isRunning]);
-  return null;
 }

@@ -11,9 +11,9 @@ export function Header() {
 
   return (
     <header className="header">
-      <div className="brand" aria-label="Ocean Tap brand">
+      <div className="brand" aria-label="Ocean Snake brand">
         <div className="brand-badge" aria-hidden>O</div>
-        <h1 className="title">Ocean Tap</h1>
+        <h1 className="title">Ocean Snake</h1>
       </div>
       <div className="score-chip" aria-live="polite" aria-atomic="true" title="Current score">
         ⭐ Score

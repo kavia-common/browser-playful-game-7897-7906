@@ -33,13 +33,15 @@ export function FooterControls() {
   const onReset = () => {
     window.__oceanGame?.stop?.();
     resetScore();
+    // engine will reset when recreated by component on mount/responsive change,
+    // here we just pause and let user start again
     setTimeout(() => window.__oceanGame?.start?.(), 100);
   };
 
   return (
     <footer className="footer" aria-label="Game controls">
       <div className="help" aria-hidden="true">
-        Tip: Use <span className="kbd">Space</span> / <span className="kbd">Enter</span>
+        Tip: Use <span className="kbd">Arrow Keys</span> or <span className="kbd">WASD</span>. Space pauses.
       </div>
       <div className="controls">
         <button className="btn btn-primary" onClick={onStartPause}>

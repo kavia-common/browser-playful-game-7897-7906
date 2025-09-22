@@ -1,15 +1,22 @@
-# Ocean Tap — React Browser Game
+# Ocean Snake — React Browser Game
 
-A modern, responsive browser game built with React. Tap the moving target as fast as you can within the timer and build combos for higher scores. Designed with the Ocean Professional theme: blue and amber accents, subtle gradients, rounded corners, and smooth transitions.
+A modern, responsive Snake game built with React. Steer the snake to eat food, grow longer, and avoid walls and yourself. Styled with the Ocean Professional theme: blue and amber accents, subtle gradients, rounded corners, and smooth transitions.
 
 ## Features
 
-- Centralized layout: header (title + score), game area, bottom controls
-- Smooth, engaging gameplay (mouse, touch, keyboard friendly)
-- Session-based score tracking (no auth required)
-- Responsive for mobile and desktop
+- Centralized layout: header (title + live score), game grid, bottom controls
+- Classic Snake gameplay (keyboard and mobile-friendly with a virtual D-pad)
+- Live score equals number of food eaten
+- Responsive grid that scales to device size
 - Clean, modern design using pure CSS (no heavy UI framework)
-- Future-ready structure for Supabase integration
+- Modular engine (pure logic) separated from React view
+- Future-ready structure for Supabase integration (e.g., leaderboards)
+
+## Controls
+
+- Keyboard: Arrow Keys or WASD to move, Space/Enter to start/pause
+- Mobile: On-screen D-pad (appears on small screens)
+- Footer: Start/Pause and Reset buttons
 
 ## Scripts
 
@@ -29,12 +36,13 @@ Colors (in CSS variables):
 
 See:
 - `src/styles/theme.css` — variables and base resets
-- `src/styles/app.css` — layout and components
+- `src/styles/app.css` — layout and components (including Snake styles)
 
 ## Project Structure
 
 - `src/App.js` — app shell
-- `src/components/Game.jsx` — game logic and UI
+- `src/components/Game.jsx` — Snake UI and controls
+- `src/components/snake/SnakeEngine.js` — pure gameplay logic (no rendering)
 - `src/components/Header.jsx` — title + score
 - `src/components/FooterControls.jsx` — start/pause/reset
 - `src/context/ScoreContext.jsx` — session score state
@@ -42,13 +50,13 @@ See:
 
 ## Supabase (optional, not required yet)
 
-Environment variables:
+Environment variables (reserved for future use):
 - `REACT_APP_SUPABASE_URL`
 - `REACT_APP_SUPABASE_KEY`
 
-These are not used in the basic version but the contexts are structured to allow easy integration later.
+Not used in this version; the structure allows easy integration later (e.g., leaderboards).
 
 ## Accessibility
 
-- Keyboard play with Space/Enter
-- ARIA labels for key regions and dynamic score updates
+- Keyboard play with Arrow Keys/WASD
+- Clear ARIA labels for key regions and dynamic score updates
