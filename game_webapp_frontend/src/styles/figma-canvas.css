@@ -1,0 +1,257 @@
+:root {
+  /* Color variables adapted from assets/common.css, coexisting with app theme */
+  --color-1c1c1c: #1c1c1c;
+  --color-b0ee62: #b0ee62;
+  --color-ffffff: #ffffff;
+  --color-242424: #242424;
+  --color-303030: #303030;
+  --color-444444: #444444;
+  --color-000000: #000000;
+  --color-fad785: #fad785;
+  --color-fc7a69: #fc7a69;
+  --color-262626: #262626;
+  --color-27c040: #27c040;
+  --color-f24436: #f24436;
+  --color-ffe9e6: #ffe9e6;
+  --color-f3bcb3: #f3bcb3;
+  --color-fe8f81: #fe8f81;
+  --color-fd634e: #fd634e;
+  --color-fd361c: #fd361c;
+  --color-98f04b: #98f04b;
+  --color-f855b4: #f855b4;
+  --color-e53229: #e53229;
+  --color-fd6f5c: #fd6f5c;
+  --color-a01818: #a01818;
+  --color-fd4e3d: #fd4e3d;
+  --color-ffd98c: #ffd98c;
+  --color-dc9d09: #dc9d09;
+  --color-7a54c4: #7a54c4;
+  --color-9747ff: #9747ff;
+  --color-bba9e8: #bba9e8;
+  --color-c1f1ef: #c1f1ef;
+  --color-151515: #151515;
+  --color-aae165: #aae165;
+
+  /* Shadows from design */
+  --shadow-0: 0px 1px 11px 0 #fd6f5c;
+  --shadow-1: 0px 2px 28px 0 #fd634f;
+
+  /* Rounding */
+  --radius-1: 1px;
+  --radius-2: 2px;
+  --radius-5: 5px;
+  --radius-6: 6px;
+  --radius-8: 8px;
+  --radius-16: 16px;
+  --radius-24: 24px;
+  --radius-39: 39px;
+
+  /* Typography */
+  --typo-12-size: 12px;
+  --typo-12-lh: 16px;
+
+  --typo-24-size: 24px;
+  --typo-24-lh: 32px;
+
+  --typo-32-size: 32px;
+  --typo-32-lh: 36px;
+
+  --typo-16-size: 16px;
+  --typo-16-lh: 20px;
+
+  --typo-40-size: 40px;
+  --typo-40-lh: 44px;
+
+  --typo-60-size: 60px;
+  --typo-60-lh: 90px;
+
+  /* Canvas ref size */
+  --canvas-width: 360px;
+  --canvas-height: 780px;
+}
+
+/* Namespaced wrapper to avoid style collisions with app */
+.figma-page {
+  min-height: 100%;
+  width: 100%;
+  display: grid;
+  place-items: center;
+  background: var(--color-1c1c1c);
+}
+
+.figma-canvas {
+  position: relative;
+  width: var(--canvas-width);
+  height: var(--canvas-height);
+  background: var(--color-1c1c1c);
+  overflow: hidden;
+  transform-origin: top left;
+}
+
+/* Responsive scale behavior for small screens */
+@media (max-width: 360px), (max-height: 780px) {
+  .figma-page {
+    align-items: start;
+  }
+  .figma-canvas {
+    width: calc(100vw);
+    height: calc(100vw * (780 / 360));
+    transform: scale(calc(100vw / 360));
+  }
+}
+
+/* Absolute positioning utility for children */
+.figma-canvas > * { position: absolute; }
+
+/* Text styles */
+.text {
+  position: absolute;
+  white-space: pre;
+}
+
+.text-typo9 {
+  font-size: var(--typo-12-size);
+  line-height: var(--typo-12-lh);
+  font-weight: 400;
+  color: var(--color-b0ee62);
+  text-align: left;
+}
+.text-typo10 {
+  font-size: var(--typo-12-size);
+  line-height: var(--typo-12-lh);
+  font-weight: 400;
+  color: var(--color-ffffff);
+  text-align: left;
+}
+.text-typo11 {
+  font-size: var(--typo-12-size);
+  line-height: var(--typo-12-lh);
+  font-weight: 700;
+  color: var(--color-ffffff);
+  text-align: right;
+}
+.text-typo12 {
+  font-size: var(--typo-12-size);
+  line-height: var(--typo-12-lh);
+  font-weight: 700;
+  color: var(--color-ffffff);
+  text-align: left;
+}
+.text-typo13 {
+  font-size: var(--typo-12-size);
+  line-height: var(--typo-12-lh);
+  font-weight: 400;
+  color: var(--color-98f04b);
+  text-align: left;
+}
+.text-typo14 {
+  font-size: var(--typo-24-size);
+  line-height: var(--typo-24-lh);
+  font-weight: 600;
+  color: var(--color-fd4e3d);
+  text-align: left;
+}
+
+/* Rectangles and frames */
+.frame-11 { position: absolute; }
+
+.rect-477 {
+  position: absolute;
+  background: var(--color-b0ee62);
+  border-radius: var(--radius-8);
+}
+
+.rect-476 {
+  position: absolute;
+  inset: 0;
+  background: var(--color-242424);
+  border: 1px solid var(--color-303030);
+  border-radius: var(--radius-16);
+}
+
+.left-frame, .right-frame { position: absolute; }
+.poly { position: absolute; }
+
+.randomiser { position: absolute; opacity: 0; }
+.randomiser .star-3 { position: absolute; opacity: 1; }
+
+.game-frame {
+  position: absolute;
+  background: var(--color-262626);
+  border-radius: var(--radius-8);
+  overflow: hidden;
+}
+.game-bg {
+  position: absolute;
+  left: -1px; top: 0;
+  width: calc(100% + 1px);
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.3;
+}
+
+.fruit-1 { position: absolute; }
+.jewel { position: absolute; }
+.jewel-layer.outer {
+  position: absolute;
+  left: -8px; top: -11px;
+  width: 42px; height: 50px;
+  background: var(--color-f24436);
+  opacity: 0.3;
+  border-radius: 6px;
+  filter: blur(0.2px);
+}
+.jewel-layer.core {
+  position: absolute;
+  left: 0; top: -4px;
+  width: 24px; height: 32px;
+  background: var(--color-f24436);
+  border-radius: 4px;
+}
+.jewel-highlight.a, .jewel-highlight.b {
+  position: absolute;
+  background: var(--color-ffffff);
+  border-radius: 50%;
+  opacity: 1;
+}
+.jewel-highlight.a { left: 14px; top: 6px; width: 6px; height: 6px; }
+.jewel-highlight.b { left: 18px; top: 12px; width: 2px; height: 2px; }
+
+.jewel-label { position: absolute; display: flex; gap: 2px; align-items: center; }
+
+.pixel { position: absolute; }
+.pixel-rect { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+.rect-style-43 {
+  background: var(--color-fd634e);
+  border-radius: var(--radius-2);
+  box-shadow: var(--shadow-0);
+}
+.rect-style-44 {
+  background: var(--color-fd361c);
+  border-radius: var(--radius-2);
+  box-shadow: var(--shadow-0);
+}
+
+.frame-14 {
+  position: absolute;
+  opacity: 0.23;
+  padding: 4px;
+  display: grid;
+  grid-auto-rows: 16px;
+  align-content: start;
+}
+.frame-14 .row { display: flex; gap: 4px; height: 16px; }
+
+.component-1 { position: absolute; }
+.component-1 .gem {
+  width: 100%; height: 100%;
+  background: radial-gradient(circle at 30% 30%, var(--color-f855b4), var(--color-e53229));
+  border-radius: 50%;
+  box-shadow: var(--shadow-1);
+  border: 0;
+}
+
+.frame-9 { position: absolute; }
+
+.frame-rate, .timer { position: absolute; opacity: 0; }
+.frame-rate .frame-star, .timer .timer-star { position: absolute; opacity: 1; }
