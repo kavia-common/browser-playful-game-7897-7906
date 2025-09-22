@@ -1,82 +1,54 @@
-# Lightweight React Template for KAVIA
+# Ocean Tap — React Browser Game
 
-This project provides a minimal React template with a clean, modern UI and minimal dependencies.
+A modern, responsive browser game built with React. Tap the moving target as fast as you can within the timer and build combos for higher scores. Designed with the Ocean Professional theme: blue and amber accents, subtle gradients, rounded corners, and smooth transitions.
 
 ## Features
 
-- **Lightweight**: No heavy UI frameworks - uses only vanilla CSS and React
-- **Modern UI**: Clean, responsive design with KAVIA brand styling
-- **Fast**: Minimal dependencies for quick loading times
-- **Simple**: Easy to understand and modify
+- Centralized layout: header (title + score), game area, bottom controls
+- Smooth, engaging gameplay (mouse, touch, keyboard friendly)
+- Session-based score tracking (no auth required)
+- Responsive for mobile and desktop
+- Clean, modern design using pure CSS (no heavy UI framework)
+- Future-ready structure for Supabase integration
 
-## Getting Started
+## Scripts
 
-In the project directory, you can run:
+- `npm start` — development server at http://localhost:3000
+- `npm test` — run tests
+- `npm run build` — production build
 
-### `npm start`
+## Theme
 
-Runs the app in development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+Colors (in CSS variables):
+- primary: `#2563EB`
+- secondary: `#F59E0B`
+- error: `#EF4444`
+- background: `#f9fafb`
+- surface: `#ffffff`
+- text: `#111827`
 
-### `npm test`
+See:
+- `src/styles/theme.css` — variables and base resets
+- `src/styles/app.css` — layout and components
 
-Launches the test runner in interactive watch mode.
+## Project Structure
 
-### `npm run build`
+- `src/App.js` — app shell
+- `src/components/Game.jsx` — game logic and UI
+- `src/components/Header.jsx` — title + score
+- `src/components/FooterControls.jsx` — start/pause/reset
+- `src/context/ScoreContext.jsx` — session score state
+- `src/context/ThemeContext.jsx` — theme provider
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Supabase (optional, not required yet)
 
-## Customization
+Environment variables:
+- `REACT_APP_SUPABASE_URL`
+- `REACT_APP_SUPABASE_KEY`
 
-### Colors
+These are not used in the basic version but the contexts are structured to allow easy integration later.
 
-The main brand colors are defined as CSS variables in `src/App.css`:
+## Accessibility
 
-```css
-:root {
-  --kavia-orange: #E87A41;
-  --kavia-dark: #1A1A1A;
-  --text-color: #ffffff;
-  --text-secondary: rgba(255, 255, 255, 0.7);
-  --border-color: rgba(255, 255, 255, 0.1);
-}
-```
-
-### Components
-
-This template uses pure HTML/CSS components instead of a UI framework. You can find component styles in `src/App.css`. 
-
-Common components include:
-- Buttons (`.btn`, `.btn-large`)
-- Container (`.container`)
-- Navigation (`.navbar`)
-- Typography (`.title`, `.subtitle`, `.description`)
-
-## Learn More
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+- Keyboard play with Space/Enter
+- ARIA labels for key regions and dynamic score updates

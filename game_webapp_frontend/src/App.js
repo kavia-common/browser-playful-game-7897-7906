@@ -1,48 +1,35 @@
-import React, { useState, useEffect } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React from 'react';
+import './styles/theme.css';
+import './styles/app.css';
+import { Game } from './components/Game';
+import { Header } from './components/Header';
+import { FooterControls } from './components/FooterControls';
+import { ThemeProvider } from './context/ThemeContext';
+import { ScoreProvider } from './context/ScoreContext';
 
-// PUBLIC_INTERFACE
+/**
+ * PUBLIC_INTERFACE
+ * App
+ * The main application shell. Provides Theme and Score contexts,
+ * and composes the header, game area, and footer controls following
+ * the "Ocean Professional" theme and layout.
+ */
 function App() {
-  const [theme, setTheme] = useState('light');
-
-  // Effect to apply theme to document element
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-  }, [theme]);
-
-  // PUBLIC_INTERFACE
-  const toggleTheme = () => {
-    setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
-  };
-
   return (
-    <div className="App">
-      <header className="App-header">
-        <button 
-          className="theme-toggle" 
-          onClick={toggleTheme}
-          aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-        >
-          {theme === 'light' ? '🌙 Dark' : '☀️ Light'}
-        </button>
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <p>
-          Current theme: <strong>{theme}</strong>
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <ThemeProvider>
+      <ScoreProvider>
+        <div className="app-root">
+          <div className="app-gradient" />
+          <div className="app-container" role="application" aria-label="Ocean Tap game">
+            <Header />
+            <main className="game-wrapper" id="game-wrapper">
+              <Game />
+            </main>
+            <FooterControls />
+          </div>
+        </div>
+      </ScoreProvider>
+    </ThemeProvider>
   );
 }
 
