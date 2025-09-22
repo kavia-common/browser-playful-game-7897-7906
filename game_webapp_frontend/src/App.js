@@ -19,7 +19,12 @@ function App() {
         <div className="app-root">
           <div className="app-gradient" />
           <main className="game-wrapper" id="game-wrapper" aria-label="Ocean Snake game">
-            <div style={{ width: '100%' }}>
+            <div style={{
+              width: '100%',
+              display: 'grid',
+              placeItems: 'center',
+              overflow: 'visible'
+            }}>
               <GameScreenDesign />
             </div>
           </main>

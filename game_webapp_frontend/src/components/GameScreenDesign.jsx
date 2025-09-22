@@ -184,7 +184,14 @@ export function GameScreenDesign() {
         <section
           className="hud hud-design"
           aria-label="Game HUD"
-          style={{ left: 26.5, top: 195, width: 230, height: 32 }}
+          style={{
+            left: 26.5,
+            top: 195,
+            width: 230,
+            height: 32,
+            /* Ensure HUD is visible even when scaled */
+            maxWidth: 'calc(var(--canvas-width) - 40px)'
+          }}
         >
           <div
             className="frame-11"
@@ -228,7 +235,14 @@ export function GameScreenDesign() {
         {/* Game container with background */}
         <section
           className="game-frame"
-          style={{ left: -88, top: -345, width: 312, height: 528 }}
+          style={{
+            /* Center the game frame inside the canvas rather than negative offsets that can clip */
+            left: '50%',
+            top: '50%',
+            width: 312,
+            height: 528,
+            transform: 'translate(-50%, -50%)'
+          }}
           aria-label="Game area container"
           data-theme={theme}
         >
@@ -339,7 +353,7 @@ export function GameScreenDesign() {
         </section>
 
         {/* Decorative elements preserved and left non-interactive */}
-        <div className="component-1" style={{ left: 160, top: -380, width: 16, height: 16 }}>
+        <div className="component-1" style={{ left: 160, top: 8, width: 16, height: 16 }}>
           <div className="gem" />
         </div>
 
@@ -347,11 +361,11 @@ export function GameScreenDesign() {
           className="image-2"
           src="/assets/figma_image_27_231.png"
           alt=""
-          style={{ left: -87, top: -390, width: 88, height: 30 }}
+          style={{ left: 12, top: 8, width: 88, height: 30 }}
         />
 
         {/* Non-essential visual-only elements remain hidden (per design css they have opacity:0) */}
-        <div className="frame-rate" style={{ left: -112, top: -422, width: 51, height: 51 }} aria-hidden="true">
+        <div className="frame-rate" style={{ left: 12, top: 52, width: 51, height: 51 }} aria-hidden="true">
           <div className="frame-star" style={{ left: 8, top: 8, width: 35, height: 35 }}>
             <svg viewBox="0 0 35 35" width="35" height="35" aria-hidden="true">
               <polygon
@@ -362,7 +376,7 @@ export function GameScreenDesign() {
           </div>
         </div>
 
-        <div className="timer" style={{ left: -112, top: -422, width: 40, height: 40 }} aria-hidden="true">
+        <div className="timer" style={{ left: 70, top: 56, width: 40, height: 40 }} aria-hidden="true">
           <div className="timer-star" style={{ left: 8, top: 8, width: 24, height: 24 }}>
             <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
               <polygon
