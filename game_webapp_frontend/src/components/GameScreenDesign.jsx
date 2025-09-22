@@ -93,14 +93,15 @@ export function GameScreenDesign() {
 
     const computeGrid = () => {
       const rect = el.getBoundingClientRect();
-      // We leave an inner padding similar to the placeholder inset used earlier
+      // Leave inner padding like the placeholder area
       const padding = 8;
       const usableW = rect.width - padding * 2;
       const usableH = rect.height - padding * 2;
-      // choose near-square based on smaller dimension; prefer 18-24 cols for visual parity
-      const targetCols = Math.max(14, Math.min(26, Math.floor(usableW / 18)));
-      const cols = targetCols;
-      const rows = Math.max(14, Math.min(26, Math.floor(usableH / (usableW / cols))));
+
+      // Aim for square-ish grid. Pick cols based on width and an ideal ~18px cell.
+      const idealCell = 18;
+      const cols = Math.max(14, Math.min(28, Math.floor(usableW / idealCell)));
+      const rows = Math.max(14, Math.min(28, Math.floor(usableH / idealCell)));
       const cellPx = Math.floor(Math.min(usableW / cols, usableH / rows));
       setGrid({ cols, rows, cellPx, padding });
     };
@@ -164,8 +165,9 @@ export function GameScreenDesign() {
   const softRestart = useCallback(() => {
     engineRef.current?.stop?.();
     resetScore();
-    // engine gets recreated on grid change; here we just pause and let the user start
-    setTimeout(() => engineRef.current?.start?.(), 80);
+    // Reset engine fully to restore initial state and avoid residual speed increases
+    engineRef.current?.reset?.();
+    setTimeout(() => engineRef.current?.start?.(), 100);
   }, [resetScore]);
 
   return (
@@ -187,7 +189,7 @@ export function GameScreenDesign() {
           >
             <div className="text text-typo9" style={{ left: 0, top: 0, width: 82, height: 16 }}>TIME LEFT:</div>
             <div className="text text-typo10" style={{ left: 82, top: 0, width: 24, height: 16 }}>
-              {/* Simple timer feel: derive from running state to blink; not a countdown mechanic */}
+              {/* Simple timer feel: derive from running state; not a countdown mechanic */}
               {state.running ? '∞' : '0'}
             </div>
             <div className="text text-typo10" style={{ left: 108, top: 0, width: 12, height: 16 }}>s</div>
